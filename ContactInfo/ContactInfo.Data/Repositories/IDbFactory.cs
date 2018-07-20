@@ -7,10 +7,8 @@ using System.Threading.Tasks;
 
 namespace ContactInfo.Data.Repositories
 {
-   public interface IContactRepository:IRepository<Contact>
+   public interface IDbFactory : IDisposable
     {
-        List<Contact> List(int startIndex, int count, string sorting);
-        int Delete(int ContactId);
-
+        ContactInfoEFModel Init();
     }
 }

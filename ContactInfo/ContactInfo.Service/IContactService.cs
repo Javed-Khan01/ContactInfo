@@ -10,6 +10,7 @@ namespace ContactInfo.Service
     {
         int Add(Contact contact);
         int Update(Contact contact);
+        int ActiveDeactive(int ContactId);
         List<Contact> List(int startIndex, int count, string sorting);
         int Delete(int ContactId);
     }

@@ -1,0 +1,169 @@
+﻿@model ContactInfo.Data.EFModels.Contact
+@{
+    ViewBag.Title = "Index";
+}
+
+
+@using (Ajax.BeginForm("Add", "Contacts", new AjaxOptions { OnSuccess = "OnSuccess", OnFailure = "OnFailure" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <h4>Add Contact</h4>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.LabelFor(model => model.FirstName, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.FirstName, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.LastName, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.LastName, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Email, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.PhoneNumber, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.PhoneNumber, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.PhoneNumber, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Submit" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    <div id="ContactList"></div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        GetContacts();
+    });
+    function OnSuccess(data) {
+        alert("Contact added successfully!.")
+        GetContacts();
+     }
+    function OnFailure(data) {
+
+    }
+    function GetContacts() {
+
+        $("#ContactList").jtable({
+			title: '  ',
+			paging: true,
+			pageSize: 10,
+			sorting: true,
+            defaultSorting: 'ContactId Desc',
+			actions: {
+				listAction: '@Url.Action("../Contacts/ContactList")',
+                updateAction: '@Url.Action("../Contacts/update")',
+			},
+			fields: {
+                ContactId: {
+					key: true,
+					create: false,
+					edit: false,
+					list: false
+				},
+                FirstName: {
+                    title: 'First Name',
+					width: '15%'
+                },
+                LastName: {
+                    title: 'Last Name',
+                    width: '15%'
+                },
+                Email: {
+                    title: 'Email',
+                    width: '20%'
+                },
+                PhoneNumber: {
+                    title: 'Phone Number',
+                    width: '20%'
+                }
+                ,
+                Status: {
+                    title: 'Status',
+                    width: '15%',
+                    edit: false,
+                    display: function (data) {
+                        if (data.record.Status) {
+                            return 'Active'
+                        }
+                        else {
+                            return 'Deactive'
+                        }
+                    }
+                },
+                Action: {
+                    title: 'Action',
+                    width: '15%',
+                    display: function (data) {
+                        if (data.record.Status) {
+                            return '<a href="#" onclick="ActiveDeactive(' + data.record.ContactId + ')">Deactivate</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href = "#" onclick = "OnDelete(' + data.record.ContactId +')">Delete</a >'
+                        }
+                        else {
+                            return '<a href="#" onclick="ActiveDeactive(' + data.record.ContactId + ')">Activate</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href = "#" onclick = "OnDelete(' + data.record.ContactId +')">Delete</a >'
+                        }
+                    },
+                    edit: false
+                }
+			}
+
+		});
+        $('#ContactList').jtable('load');
+    }
+    function ActiveDeactive(ContactId) {
+        $.ajax({
+            url: "../Contacts/ActiveDeactive",
+            data: '{"ContactId":"' + ContactId + '"}',
+            dataType: "JSON",
+            type: "POST",
+            contentType: "application/JSON; charset=utf-8",
+            success: function (response) {
+                if (response.Result) {
+
+                        alert("Contact status updated successfully!.")
+
+                    GetContacts();
+                }
+            }
+        });
+    }
+    function OnDelete(ContactId) {
+        $.ajax({
+            url: "../Contacts/Delete",
+            data: '{"ContactId":"' + ContactId + '"}',
+            dataType: "JSON",
+            type: "POST",
+            contentType: "application/JSON; charset=utf-8",
+            success: function (response) {
+                if (response.Result) {
+
+                    alert("Contact deleted successfully!.");
+                    GetContacts();
+                }
+            }
+        });
+    }
+</script>  

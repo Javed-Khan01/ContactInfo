@@ -4,33 +4,53 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ContactInfo.Data.EFModels;
+using ContactInfo.Data.Repositories;
 
 namespace ContactInfo.Service
 {
     public class ContactService : IContactService
     {
-        public ContactService()
+        IContactRepository iContactRepository;
+        public ContactService(IContactRepository icontactRepository)
         {
-
+            iContactRepository = icontactRepository;
         }
         public int Add(Contact contact)
         {
-            throw new NotImplementedException();
+            iContactRepository.Add(contact);
+            return contact.ContactId;
+        }
+
+
+        public List<Contact> List(int startIndex, int count, string sorting)
+        {
+            return iContactRepository.List(startIndex,count,sorting);
+        }
+
+        public int ActiveDeactive(int ContactId)
+        {
+            var contact = iContactRepository.GetById(ContactId);
+            if (contact.Status == false)
+                contact.Status = true;
+            else
+                contact.Status = false;
+            iContactRepository.Update(contact);
+            return contact.ContactId;
         }
 
         public int Delete(int ContactId)
         {
-            throw new NotImplementedException();
-        }
+            var contact = iContactRepository.GetById(ContactId);
 
-        public List<Contact> List(int startIndex, int count, string sorting)
-        {
-            throw new NotImplementedException();
+                contact.IsDelete = true;
+            iContactRepository.Update(contact);
+            return contact.ContactId;
         }
 
         public int Update(Contact contact)
         {
-            throw new NotImplementedException();
+            iContactRepository.Update(contact);
+            return contact.ContactId;
         }
     }
 }

@@ -7,8 +7,10 @@ using ContactInfo.Data.EFModels;
 
 namespace ContactInfo.Data.Repositories
 {
-    public class ContactRepository : IContactRepository
+    public class ContactRepository : RepositoryBase<Contact>,IContactRepository
     {
+        public ContactRepository(IDbFactory dbFactory)
+           : base(dbFactory) { }
         public int Delete(int ContactId)
         {
             throw new NotImplementedException();
@@ -16,7 +18,30 @@ namespace ContactInfo.Data.Repositories
 
         public List<Contact> List(int startIndex, int count, string sorting)
         {
-            throw new NotImplementedException();
+            IQueryable<Contact> query;
+
+            query=context.Contacts.Where(m=>m.IsDelete==false);
+            query = query.OrderBy(c => c.ContactId);
+            if (string.IsNullOrEmpty(sorting) || sorting.Equals("FirstName ASC"))
+            {
+                query = query.OrderBy(c => c.FirstName);
+            }
+            else if (sorting.Equals("FirstName DESC"))
+            {
+                query = query.OrderByDescending(c => c.FirstName);
+            }
+            else if (string.IsNullOrEmpty(sorting) || sorting.Equals("LastName ASC"))
+            {
+                query = query.OrderBy(c => c.LastName);
+            }
+            else if (sorting.Equals("LastName DESC"))
+            {
+                query = query.OrderByDescending(c => c.LastName);
+            }
+            
+            return count > 0
+                       ? query.Skip(startIndex).Take(count).ToList() //Paging
+                       : query.ToList(); //No paging
         }
     }
 }
